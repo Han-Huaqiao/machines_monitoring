@@ -112,7 +112,6 @@ class MachineMonitor(object):
             return "\n".join(output)  # 返回清理后的输出
 
         except Exception as e:
-            print(f"命令执行异常：{str(e)}")
             self.connected = False
             return ""
 
