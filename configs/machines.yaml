@@ -1,0 +1,14 @@
+machines:
+  - host: "10.129.130.82"
+    username: "root"
+    type: "XPU"
+  - host: "10.129.130.84"
+    username: "root"
+    type: "XPU"
+  - host: "10.129.130.86"
+    username: "root"
+    type: "XPU"
+  - host: "10.129.130.87"
+    username: "root"
+    type: "XPU"
+refresh_interval: 2

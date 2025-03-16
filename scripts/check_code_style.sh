@@ -1,0 +1,1 @@
+flake8 $(find machines_monitoring -name "*.py")
