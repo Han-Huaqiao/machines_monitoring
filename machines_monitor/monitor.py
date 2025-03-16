@@ -36,9 +36,8 @@ class MachineMonitor(object):
         self.ssh = subprocess.Popen(
             ssh_cmd,
             stdin=subprocess.PIPE,
-            stdout=open(os.devnull, "w"),
-            # stderr=subprocess.PIPE,
-            stderr=open(os.devnull, "w"),  # TODO： 有些机器会抛出一下其他信息，影响显示效果，需要处理
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,  # TODO： 有些机器会抛出一下其他信息，影响显示效果，需要处理
             text=True,
             bufsize=0  # 禁用缓冲
         )
