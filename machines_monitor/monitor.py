@@ -24,6 +24,7 @@ class MachineMonitor(object):
 
         # 构造SSH命令（添加-T禁止伪终端）
         if "key" not in self.machine:
+            # TODO: 有些机器"-T", "-o", "ConnectTimeout=5", "-o", "BatchMode=yes" 会导致迟迟连接不上
             ssh_cmd = [
                 "ssh", "-T", "-o", "ConnectTimeout=5", "-o", "BatchMode=yes", "-o", "StrictHostKeyChecking no",
                 f"{self.machine['username']}@{self.machine['host']}"
@@ -35,8 +36,9 @@ class MachineMonitor(object):
         self.ssh = subprocess.Popen(
             ssh_cmd,
             stdin=subprocess.PIPE,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            stdout=open(os.devnull, "w"),
+            # stderr=subprocess.PIPE,
+            stderr=open(os.devnull, "w"),  # TODO： 有些机器会抛出一下其他信息，影响显示效果，需要处理
             text=True,
             bufsize=0  # 禁用缓冲
         )
@@ -139,7 +141,7 @@ class MachineMonitor(object):
             return {"percent": 0.0, "used_gb": 0, "total_gb": 0}
 
     def get_gpu_info(self) -> List[Dict[str, Any]]:
-        cmd = "nvidia-smi --query-gpu=index,memory.used,utilization.gpu --format=csv,noheader,nounits"
+        cmd = "nvidia-smi --query-gpu=index,memory.used,memory.total,utilization.gpu,temperature.gpu,power.draw --format=csv,noheader,nounits"
         output = self.get_remote_info(cmd)
         return self.parse_gpu(output)
 
@@ -158,9 +160,18 @@ class MachineMonitor(object):
         for line in output.split("\n"):
             if not line or ", " not in line:
                 continue
+            # 0, 60293, 81920, 13, 37, 72.39
             try:
-                idx, mem, util = line.split(", ")
-                gpus.append({"id": int(idx), "mem": int(mem), "util": int(util), "type": "GPU"})
+                idx, used_mem, total_mem, util, temp, power = line.split(", ")
+                gpus.append({
+                    "id": int(idx),
+                    "used": int(used_mem),
+                    "total": int(total_mem),
+                    "util": int(util),
+                    "temp": int(temp),
+                    "power": float(power),
+                    "type": "GPU"
+                })
             except:
                 continue
         return gpus
