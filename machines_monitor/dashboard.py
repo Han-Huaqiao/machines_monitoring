@@ -217,9 +217,13 @@ class Dashboard:
     def run(self) -> None:
         # 启动监控线程
         for machine in self.machines:
-            monitor = MachineMonitor(machine, self.queue, refresh_interval=self.refresh_interval)
-            thread = threading.Thread(target=monitor.monitor, daemon=True)
-            thread.start()
+            try:
+                monitor = MachineMonitor(machine, self.queue, refresh_interval=self.refresh_interval)
+                thread = threading.Thread(target=monitor.monitor, daemon=True)
+                thread.start()
+            except Exception as e:
+                # TODO: 增加日志
+                print(f"Machine {machine} connection failed: {str(e)}.")
 
         # 主显示循环
         while self.running:
